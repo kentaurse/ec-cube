@@ -117,9 +117,9 @@ class LC_Page_Contact extends LC_Page {
             $this->arrForm = $this->lfConvertParam($this->arrForm,$arrConvertColumn);
             $this->arrErr = $this->lfErrorCheck($this->arrForm);
             if(!$this->arrErr) {
-                $this->lfSendMail($CONF, $objPage);
-                // FIXME 完了ページへ移動する
-                header("location: ./complete.php");
+                $this->lfSendMail($CONF, $this);
+                // 完了ページへ移動する
+                $this->sendRedirect($this->getLocation("./complete.php", array(), true));
                 exit;
             } else {
                 SC_Utils_Ex::sfDispSiteError(CUSTOMER_ERROR);
@@ -148,7 +148,7 @@ class LC_Page_Contact extends LC_Page {
     // }}}
     // {{{ protected functions
 
-    //エラーチェック処理部 FIXME
+    //エラーチェック処理部
     function lfErrorCheck($array) {
         $objErr = new SC_CheckError($array);
         $objErr->doFunc(array("お名前(姓)", 'name01', STEXT_LEN), array("EXIST_CHECK","SPTAB_CHECK","MAX_LENGTH_CHECK"));
@@ -169,8 +169,8 @@ class LC_Page_Contact extends LC_Page {
 
         if (REVIEW_ALLOW_URL == false) {
             // URLの入力を禁止
-            global $arrReviewDenyURL;
-            $objErr->doFunc(array("URL", "contents", $arrReviewDenyURL), array("PROHIBITED_STR_CHECK"));
+            $masterData = new SC_DB_MasterData_Ex();
+            $objErr->doFunc(array("URL", "contents", $masterData->getMasterData("mtb_review_deny_url")), array("PROHIBITED_STR_CHECK"));
         }
 
         return $objErr->arrErr;
